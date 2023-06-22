@@ -1,5 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { ApiParam, ApiQuery } from '@nestjs/swagger/dist';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Delete,
+} from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Task } from './entities/task.entity';
 import { CreateTaskDTO } from './dto/create-task.dto';
@@ -11,22 +18,25 @@ export class TasksController {
   constructor(private tasksService: TasksService) {}
 
   @Get()
-  @ApiQuery({ name: 'title', required: false })
-  getAllTasks(@Query('title') title?: string): Task[] {
-    return this.tasksService.findAllTasks(title);
-  }
-
-  @Get(':title')
-  @ApiParam({ name: 'title', required: false })
-  getTaskByTitle(
-    @Param('title')
-    title: string,
-  ): Task[] {
-    return this.tasksService.findTaskByTitle(title);
+  getAllTasks(): Promise<Task[]> {
+    return this.tasksService.findAllTasks();
   }
 
   @Post()
-  createTask(@Body() body: CreateTaskDTO): Task {
+  createTask(@Body() body: CreateTaskDTO): Promise<Task> {
     return this.tasksService.addTask(body);
+  }
+
+  @Put(':uuid')
+  async updateTask(
+    @Param('uuid') uuid: string,
+    @Body() body: CreateTaskDTO,
+  ): Promise<Task> {
+    return await this.tasksService.updateTask(uuid, body);
+  }
+
+  @Delete(':uuid')
+  async deleteTask(@Param('uuid') uuid: string): Promise<Task> {
+    return await this.tasksService.deleteTask(uuid);
   }
 }
